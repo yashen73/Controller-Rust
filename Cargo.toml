@@ -1,0 +1,38 @@
+[package]
+name = "new-practice-api"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+actix-web = "4.4"
+actix-cors = "0.6"
+actix-identity = "0.9"
+actix-session = { version = "0.8", features = ["redis-rs-session"]}
+
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.6", features = ["v4", "serde"]}
+chrono =  { version="0.4", features = ["serde"] }
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio-native-tls", "postgres", "uuid", "chrono", "migrate"] }
+
+# Auth & Security
+argon2 = "0.5"
+jsonwebtoken = "9.2"
+bcrypt = "0.15"
+rand = "0.5"
+
+# Validation
+validator = {version = "0.16", features = ["derive"] }
+
+# Enviroment 
+dotenv =  "0.15"
+config = "0.13"
+
+# Logging
+env_logger = "0.10"
+
+#Email (for Passwird reset) 
+lettre = { version= "0.10", features = ["smtp-transport", "builder", "tokio1-native-tls"] }
