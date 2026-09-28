@@ -52,9 +52,9 @@ impl Config {
 
         Config {
             database: DatabaseConfig {
-                url: std:: env::var(DATABASE_URL)
+                url: std::env::var("DATABASE_URL")
                 .expect("DATABASE_URL must be set"),
-                max_connections: std::env::var("DATABASE_MAX_CONNECTIONSs")
+                max_connections: std::env::var("DATABASE_MAX_CONNECTIONS")
                 .unwrap_or_else(|_| "S".to_string())
                 .parse()
                 .unwrap(),
@@ -62,11 +62,11 @@ impl Config {
             jwt: JWTConfig {
                 secret: std::env::var("JWT_SECRET")
                     .expect("JWT_SECRET must be set"),
-                access_token_expiry: std::env::var("JWT_ACCESS_ESPIRY")
+                access_token_expiry: std::env::var("JWT_ACCESS_EXPIRY")
                     .unwrap_or_else(|_| "15".to_string())
                     .parse()
                     .unwrap(),
-                refresh_token_expiry: st::env::var("JWRT_REFRESH_EXPIRY")
+                refresh_token_expiry: std::env::var("JWRT_REFRESH_EXPIRY")
                     .unwrap_or_else(|_| "7".to_string())
                     .parse()
                     .unwrap(),
@@ -79,7 +79,7 @@ impl Config {
                     .parse()
                     .unwrap(),
                 frontend_url: std::env::var("FRONTEND_URL")
-                    .unwrap_or_else(|_| "http://localhost:3000".to_string())
+                    .unwrap_or_else(|_| "http://localhost:3000".to_string()),
             },
             email: EmailConfig {
                 smtp_host: std::env::var("SMTP_HOST")

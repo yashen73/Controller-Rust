@@ -253,6 +253,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "actix-web-httpauth"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "456348ed9dcd72a13a1f4a660449fafdecee9ac8205552e286809eb5b0b29bd3"
+dependencies = [
+ "actix-utils",
+ "actix-web",
+ "base64 0.22.1",
+ "futures-core",
+ "futures-util",
+ "log",
+ "pin-project-lite",
+]
+
+[[package]]
 name = "adler2"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1585,6 +1600,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ipnetwork"
+version = "0.20.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf466541e9d546596ee94f9f69590f89473455f88372423e0008fc1a7daf100e"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "is-terminal"
 version = "0.4.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1861,12 +1885,14 @@ dependencies = [
  "actix-identity",
  "actix-session 0.8.0",
  "actix-web",
+ "actix-web-httpauth",
  "argon2",
  "bcrypt",
  "chrono",
  "config",
  "dotenv",
  "env_logger",
+ "ipnetwork",
  "jsonwebtoken",
  "lettre",
  "rand 0.5.6",
@@ -2824,6 +2850,7 @@ dependencies = [
  "hashlink",
  "hex",
  "indexmap",
+ "ipnetwork",
  "log",
  "memchr",
  "native-tls",
@@ -2948,6 +2975,7 @@ dependencies = [
  "hkdf",
  "hmac",
  "home",
+ "ipnetwork",
  "itoa",
  "log",
  "md-5",

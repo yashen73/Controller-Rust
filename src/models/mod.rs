@@ -1,11 +1,11 @@
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
-use chrono::{DateTIme, utc};
-use validator::validate;
+use chrono::{DateTime, Utc};
+use validator::Validate;
 
-#[derive(Deserialize, Serialize, Debug, Clone, sqlx::FromRow)]
-pub struct user {
-     pub id: Uuid,
+#[derive(Debug, Deserialize, Serialize, Clone, sqlx::FromRow)]
+pub struct User {
+    pub id: Uuid,
     pub email: String,
     pub username: String,
     pub password_hash: String,
@@ -20,10 +20,10 @@ pub struct user {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Deserialize, Serialize)] 
+#[derive(Debug, Deserialize, Validate)] 
 pub struct RegisterRequest {
     #[validate(email)]
-    pub email:String,
+    pub email: String,
 
     #[validate(length(min = 3, max = 30))]
     pub username:String,
@@ -35,7 +35,7 @@ pub struct RegisterRequest {
     pub full_name: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Validate)]
 pub struct LoginRequest {
     #[validate(email)]
     pub email: String,
@@ -46,21 +46,21 @@ pub struct LoginRequest {
 
 #[derive(Debug, Serialize)]
 pub struct AuthResponse {
-    pub access_token: String,
-    pub refresh_token: String,
+   // pub access_token: String,
+   // pub refresh_token: String,
     pub token_type: String,
     pub expires_in: i64,
     pub user: UserResponse, 
 }
 
-#[derice(Debug, Serialize)]
+#[derive(Debug, Serialize)]
 pub struct UserResponse {
-    pub id:id,
+    pub id: Uuid,
     pub email: String,
     pub username: String,
     pub full_name: String,
     pub is_verified: bool,
-    pub created_at: DateTIme<Utc>,
+    pub created_at: DateTime<Utc>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -73,7 +73,7 @@ pub struct LogoutRequest {
     pub refresh_token: Option<String>,
 }
 
-#[derive(debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate)]
 pub struct ForgotPasswordRequest {
     #[validate(email)]
     pub email: String,
