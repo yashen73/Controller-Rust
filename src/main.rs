@@ -17,9 +17,7 @@ use std::{env, fmt::format};
 
 
 use crate::{
-    auth::{AuthService},
-    config::Config,
-    db::Database,
+    auth::AuthService, config::Config, db::{database::Database, device_database::DeviceDatabase}, handlers::{device_handler, userhandlers}
 };
 
 #[actix_web::main]
@@ -31,19 +29,32 @@ async fn main() -> std::io::Result<()> {
     let config = Config::from_env();
     let config_data = web::Data::new(config.clone());
 
-    println!("Trying to connect Database");
-    let databaseconnection = match Database::new(&config).await {
+    println!("\n\nTrying to connect User Database ....");
+    let databaseconnection_1 = match Database::new(&config).await {
         Ok(db) => {
-            println!("Database Connected Successfully...");
+            println!("User Database Connected Successfully...");
             db
         }
         Err(e) => {
-            eprintln!("Failed to connect Database : {}", e);
+            eprintln!("Failed to connect User Database : {}", e);
             std::process::exit(1);
         }
     };
 
-    let db_data = web::Data::new(databaseconnection);
+    println!("\n\nTrying to connect Device Database ....");
+    let databaseconnection_2 = match DeviceDatabase::new(&config).await {
+        Ok(db) => {
+            println!("Device Database Connected Successfully...");
+            db
+        }
+        Err(e) => {
+            eprintln!("Failed to connect Device Database : {}", e);
+            std::process::exit(1);
+        }
+    };
+
+    let db_data_1 = web::Data::new(databaseconnection_1);
+    let db_data_2 = web::Data::new(databaseconnection_2);
 
     let auth_service = AuthService::new(
         config.jwt.secret.clone(),
@@ -60,9 +71,12 @@ async fn main() -> std::io::Result<()> {
     
     HttpServer::new(move || {
         let cors: Cors = Cors::default()
-            .allowed_origin(&config.server.frontend_url)
             .allowed_origin("http://localhost:3000")
             .allowed_origin("http://localhost:5173")
+            .allowed_origin_fn(|origin, _req_head| {
+                let origin_str = origin.to_str().unwrap_or("");
+                origin_str == "http://localhost:3000" || origin_str == "http://127.0.0.1:3000"
+            })
             .allowed_methods(vec!["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"])
             .allowed_headers(vec![
                 actix_web::http::header::AUTHORIZATION,
@@ -76,14 +90,25 @@ async fn main() -> std::io::Result<()> {
         App::new()
         .wrap(Logger::default())
         .wrap(cors)
-        .app_data(db_data.clone())
+        .app_data(db_data_1.clone())
+        .app_data(db_data_2.clone())
         .app_data(auth_data.clone())
         .app_data(config_data.clone())
         .service(
                 web::scope("/api/auth")
-                    .route("/register", web::post().to(handlers::register))
-                    .route("/login", web::post().to(handlers::login))
-            )
+                    .route("/login", web::post().to(handlers::userhandlers::login))
+                    .route("/editUser/{usermail}", web::post().to(handlers::userhandlers::register))
+                    .route("/deleteUser/{usermail}", web::post().to(handlers::userhandlers::register))
+        )
+        .service(
+                web::scope("/device")
+                    .route("/deviceRegister", web::post().to(handlers::device_handler::register_device))
+                    .route("/getAllDevices", web::get().to(handlers::device_handler::getAllDevices))
+                    .route("/getDeviceInfo/{deviceId}", web::get().to(handlers::device_handler::getDeviceInfo))
+                    .route("/editDevice/{deviceId}", web::get().to(handlers::device_handler::register_device))
+                    .route("/deleteDevice/{deviceId}", web::get().to(handlers::device_handler::register_device))
+                    .route("/test", web::post().to(handlers::device_handler::test))
+        )
     })
     .bind(format!("{}:{}", host, port))?
     .run()
