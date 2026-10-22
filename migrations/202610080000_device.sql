@@ -12,6 +12,14 @@ CREATE TABLE device(
     port_no BIGINT NOT NULL,
     ip_addr INET,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    notification_count BIGINT,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW() 
 );
+
+CREATE TABLE notifications(
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    deviceid UUID NOT NULL,
+    userid UUID NOT NULL,
+    msg VARCHAR(500)
+)

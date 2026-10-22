@@ -1,12 +1,13 @@
 use std::f32::consts::E;
 
-use actix_web::{HttpRequest, HttpResponse, Responder, http::header, web};
+use actix_web::{HttpRequest, HttpResponse, Responder, dev, http::header, web::{self, head}};
 use jsonwebtoken::TokenData;
+use lettre::transport::smtp::commands::{Auth, Data};
 use sqlx::{database, types::ipnetwork::IpNetwork};
 
 use crate::{
-    auth::{AuthService, Claims}, config::Config, db::{database::Database, device_database::DeviceDatabase}, models::{
-        apiResponse::{self, ApiResponse}, device::{ConnectDeviceSSH, Device, DeviceEditRequest, DeviceRegisterRequest, DeviceResponse}, user::User
+    auth::{self, AuthService, Claims}, config::Config, db::{database::Database, device_database::DeviceDatabase}, models::{
+        apiResponse::{self, ApiResponse}, device::{ConnectDeviceSSH, Device, DeviceCard, DeviceEditRequest, DeviceRegisterRequest, DeviceResponse}, user::User
     }
 };
 
@@ -42,7 +43,7 @@ pub async fn register_device(
                         //creating device....
                         let saved_device: Device = match db.create_device(
                             newuser.id, &req.nominatedid,  &newuser.username, &req.category, &req.model, &req.username, 
-                            &req.hostname, req.port_no, ip.as_ref()
+                            &req.hostname, req.port_no, ip.as_ref(), 0
                         )
                         .await {
                             Ok(device) => {
@@ -109,11 +110,11 @@ pub async fn register_device(
 
 pub async fn getAllDevices(
     head_req: HttpRequest,
-    auth_service: AuthService,
-    db_for_user: Database,
-    db_for_devices: DeviceDatabase
+    auth_service: web::Data<AuthService>,
+    db_for_user: web::Data<Database>,
+    db_for_devices: web::Data<DeviceDatabase>
 ) -> impl Responder {
-    println!("[ DeviceHandler ] :::>>> GetAllDevices is calling...");
+    println!("\n\n[ DeviceHandler ] :::>>> GetAllDevices is calling...");
 
     let catch_access_token:Option<&str>= head_req.headers().get("Authorization").and_then(|v| v.to_str().ok());
 
@@ -131,7 +132,7 @@ pub async fn getAllDevices(
         };
 
         let find_user = match db_for_user.get_user_by_email(&found_claims_for_getAllDevices.email).await {
-            Ok(Some(user)) => user,
+            Ok(Some(newuser)) => newuser,
             Ok(None) => {
                 return HttpResponse::Unauthorized().json(ApiResponse::<()>::error(
                     "user Not found".to_string()
@@ -143,19 +144,80 @@ pub async fn getAllDevices(
                 ))
             }
         };
+
+        let find_devices: Vec<DeviceCard> = match db_for_devices.find_devices_by_userid(find_user.id).await {
+            Ok(device_cards) => {
+                if device_cards.is_empty() {
+                    println!("[ DeviceHandler ] :::>>>  No Devices can be found");
+                    return HttpResponse::NoContent().json(ApiResponse::<()>::error(
+                        "No devices under this user".to_string()
+                    ));
+                }else {
+                    println!("[ DeviceHandler ] :::>>> Found Some Devices");
+                    return HttpResponse::Ok().json(ApiResponse::<>::success(device_cards));
+                }
+            },
+            Err(_) => {
+                return HttpResponse::InternalServerError().json(ApiResponse::<()>::error(
+                    "Internal Server Error".to_string()
+                ))
+            }
+        };
     }
 
-    
-
-    return HttpResponse::Found().finish();
+    return HttpResponse::Forbidden().json(ApiResponse::<()>::error(
+        "No access token is found".to_string()
+    ));
 }
 
 pub async fn getDeviceInfo(
-    path: web::Path<(u32, String)>,
-    req: HttpRequest
+    path: web::Path<(String)>,
+    head_req: HttpRequest,
+    auth_Service: web::Data<AuthService>,
+    db1_for_getdeviceinfo: web::Data<DeviceDatabase>
 ) -> impl Responder {
-    println!("[ DeviceHandler ] :::>>> GetDeviceInfo is calling...");
-    return HttpResponse::Found().finish();
+    println!("\n\n[ DeviceHandler ] :::>>> GetDeviceInfo is calling...");
+
+    let(deviceId) = path.into_inner();
+    let catch_access_troken: Option<&str>  = head_req.headers().get("Authorization").and_then(|v| v.to_str().ok());
+    
+    if let Some(token) = catch_access_troken{
+        println!("[ DeviceHandler ] :::>>> Token is :::: {}", token);
+        
+        let found_claims_for_getdeviceinfo =  match auth_Service.verify_token(token){
+            Ok(tokendata) => tokendata.claims,
+            Err(_) => {
+                println!("this is the error");
+                return HttpResponse::NonAuthoritativeInformation().json(ApiResponse::<()>::error(
+                    "No valid Information".to_string()
+                ))
+            }
+        };
+    }else {
+        return HttpResponse::Unauthorized().json(ApiResponse::<()>::error(
+            "Can not accept this request".to_string()
+        ))
+    }
+
+    let device_card: Vec<DeviceCard> = match db1_for_getdeviceinfo.find_device_by_id(&deviceId.to_string()).await {
+        Ok(found_device_card) => {
+            println!("\nthe device is : {:?}", found_device_card);
+            if found_device_card.is_empty(){
+                return HttpResponse::NotFound().json(ApiResponse::<()>::error(
+                "No Device Found".to_string()
+                ))
+            }else{
+                println!("the device is : {:?}", found_device_card);
+                return HttpResponse::Ok().json(ApiResponse::<>::success(found_device_card))
+            }
+        },
+        Err(_) => {
+            return HttpResponse::InternalServerError().json(ApiResponse::<()>::error(
+                "Internal Server Error".to_string()
+            ))
+        }
+    };
+
 }
 
 

@@ -3,9 +3,12 @@ name = "new-practice-api"
 version = "0.1.0"
 edition = "2024"
 
+
+
 [dependencies]
 actix-web = "4.4"
 actix-cors = "0.6"
+ssh2 = "0.9"
 
 actix-identity = "0.9"
 actix-session = { version = "0.8", features = ["redis-rs-session"]}
@@ -40,3 +43,5 @@ env_logger = "0.11"
 
 #Email (for Passwird reset) 
 lettre = { version= "0.10", features = ["smtp-transport", "builder", "tokio1-native-tls"] }
+
+async-ssh2-tokio = "0.13.0"

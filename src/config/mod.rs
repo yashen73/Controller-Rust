@@ -63,7 +63,7 @@ impl Config {
                 secret: std::env::var("JWT_SECRET")
                     .expect("JWT_SECRET must be set"),
                 access_token_expiry: std::env::var("JWT_ACCESS_EXPIRY")
-                    .unwrap_or_else(|_| "15".to_string())
+                    .unwrap_or_else(|_| "120".to_string())
                     .parse()
                     .unwrap(),
                 refresh_token_expiry: std::env::var("JWRT_REFRESH_EXPIRY")

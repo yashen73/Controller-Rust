@@ -107,7 +107,13 @@ async fn main() -> std::io::Result<()> {
                     .route("/getDeviceInfo/{deviceId}", web::get().to(handlers::device_handler::getDeviceInfo))
                     .route("/editDevice/{deviceId}", web::get().to(handlers::device_handler::register_device))
                     .route("/deleteDevice/{deviceId}", web::get().to(handlers::device_handler::register_device))
-                    .route("/test", web::post().to(handlers::device_handler::test))
+                    .route("/test", web::get().to(handlers::device_handler::test))
+        )
+        .service(
+                web::scope("/connectDevice")
+                    .route("/send/deviceCMD", web::post().to(handlers::device_handler::register_device))
+                    .route("/abort/deviceAbortion", web::post().to(handlers::device_handler::register_device))
+                    .route("/test", web::get().to(handlers::device_handler::test))
         )
     })
     .bind(format!("{}:{}", host, port))?

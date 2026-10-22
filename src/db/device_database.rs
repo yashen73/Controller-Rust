@@ -6,6 +6,7 @@ use sqlx::types::ipnetwork::IpNetwork;
 use sqlx::{PgPool, postgres::PgPoolOptions, Error};
 use uuid::Uuid;
 use chrono::Utc;
+use crate::models::device::DeviceCard;
 use crate::models::{
     user::{User,RefreshToken, LoginAttempt}, 
     device::{Device, DeviceResponse, DeviceEditRequest, DeviceRegisterRequest}
@@ -35,13 +36,13 @@ impl DeviceDatabase {
 
     pub async fn create_device(
         &self, userid: Uuid, nominatedid: &str, userusername: &str,  category: &str, model: &str, 
-        username: &str, hostname: &str, port_no: i64, ip_addr: Option<&IpNetwork>) -> Result<Device, Error> {
+        username: &str, hostname: &str, port_no: i64, ip_addr: Option<&IpNetwork>, notification_count: i64) -> Result<Device, Error> {
         println!("<<<<< create_device in [Device Database] is being called >>>>>");
 
         sqlx::query_as!(Device,
             r#"
-                INSERT INTO device (userid, nominatedid, userusername, category, model, username, hostname, port_no, ip_addr)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+                INSERT INTO device (userid, nominatedid, userusername, category, model, username, hostname, port_no, ip_addr, notification_count)
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
                 RETURNING 
                     id AS "id!", 
                     nominatedid AS "nominatedid!",
@@ -53,6 +54,7 @@ impl DeviceDatabase {
                     hostname AS "hostname!", 
                     port_no AS "port_no!", 
                     ip_addr AS "ip_addr!", 
+                    notification_count AS "notification_count!",
                     is_active AS "is_active!", 
                     created_at AS "created_at!", 
                     updated_at AS "updated_at!"
@@ -66,22 +68,63 @@ impl DeviceDatabase {
                 hostname, 
                 port_no, 
                 ip_addr,
+                notification_count,
         )
         .fetch_one(&self.pool)
         .await
     }
 
-    pub async fn find_device_by_userid(&self, userId: Uuid) -> Result<Option<Device>, Error> {
-        println!("<<<<< create_device in [Device Database] is being called >>>>>");
+    pub async fn find_devices_by_userid(&self, userId: Uuid) -> Result<Vec<DeviceCard>, Error> {
+        println!("<<<<< find_devices_by_userid in [Device Database] is being called >>>>>");
 
         sqlx::query_as!(
-            Device, 
+            DeviceCard, 
             r#"
-            SELECT * FROM Device WHERE userid = $1
+            SELECT 
+                nominatedid as "nominatedid!",
+                category as "category!",
+                model as "model!",
+                username as "username!",
+                hostname as "hostname!",
+                port_no as "port_no!",
+                ip_addr as "ip_addr!",
+                notification_count as "notification_count!",
+                is_active as "is_active!",
+                created_at as "created_at!",
+                updated_at as "updated_at!"
+            FROM Device 
+            WHERE userid = $1
             "#,
             userId
         )
-        .fetch_optional(&self.pool)
+        .fetch_all(&self.pool)
+        .await
+    }
+
+    pub async fn find_device_by_id(&self, deviceid: &str) -> Result<Vec<DeviceCard>, Error>{
+        println!("<<<<< find_devices_by_id in [Device Database] is being called >>>>>");
+
+        sqlx::query_as!(
+            DeviceCard,
+            r#"
+            SELECT 
+                nominatedid as "nominatedid!",
+                category as "category!",
+                model as "model!",
+                username as "username!",
+                hostname as "hostname!",
+                port_no as "port_no!",
+                ip_addr as "ip_addr!",
+                notification_count as "notification_count!",
+                is_active as "is_active!",
+                created_at as "created_at!",
+                updated_at as "updated_at!"
+            FROM device
+            WHERE nominatedid = $1
+            "#,
+            deviceid
+        )
+        .fetch_all(&self.pool)
         .await
     }
 

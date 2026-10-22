@@ -17,6 +17,7 @@ pub struct Device{
     pub port_no: i64,
     pub ip_addr: Option<IpNetwork>,
     pub is_active: bool,
+    pub notification_count: i64, 
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>
 }
@@ -57,6 +58,21 @@ pub struct DeviceResponse {
     pub hostname: String,
     pub port_no: i64,
     pub ip_addr: Option<IpNetwork>,
+    pub is_active: bool,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct DeviceCard{
+    pub nominatedid: String,
+    pub category: String,
+    pub model: String,
+    pub username: String,
+    pub hostname: String,
+    pub port_no: i64,
+    pub ip_addr: Option<IpNetwork>,
+    pub notification_count: i64,
     pub is_active: bool,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>
