@@ -2514,35 +2514,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "new-practice-api"
-version = "0.1.0"
-dependencies = [
- "actix-cors",
- "actix-identity",
- "actix-session 0.8.0",
- "actix-web",
- "actix-web-httpauth",
- "argon2 0.5.3",
- "async-ssh2-tokio",
- "bcrypt",
- "chrono",
- "config",
- "dotenv",
- "env_logger",
- "ipnetwork",
- "jsonwebtoken",
- "lettre",
- "rand 0.5.6",
- "serde",
- "serde_json",
- "sqlx",
- "ssh2",
- "tokio",
- "uuid",
- "validator",
-]
-
-[[package]]
 name = "nix"
 version = "0.31.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3888,6 +3859,36 @@ checksum = "3a766e1110788c36f4fa1c2b71b387a7815aa65f88ce0229841826633d93723e"
 dependencies = [
  "libc",
  "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "spark-micro"
+version = "0.1.0"
+dependencies = [
+ "actix-cors",
+ "actix-identity",
+ "actix-session 0.8.0",
+ "actix-web",
+ "actix-web-httpauth",
+ "argon2 0.5.3",
+ "async-ssh2-tokio",
+ "bcrypt",
+ "chrono",
+ "config",
+ "dotenv",
+ "env_logger",
+ "ipnetwork",
+ "jsonwebtoken",
+ "lettre",
+ "rand 0.5.6",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "ssh2",
+ "thiserror",
+ "tokio",
+ "uuid",
+ "validator",
 ]
 
 [[package]]

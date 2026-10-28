@@ -4,6 +4,8 @@ mod db;
 mod handlers;
 mod models;
 mod dto;
+mod ssh;
+mod newerrors;
 
 use actix_web::{App, HttpResponse, HttpServer, Responder, web::{self, Json}, middleware::Logger };
 use actix_cors::Cors;
@@ -13,11 +15,15 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::PgPool;
 use dotenv::dotenv;
-use std::{env, fmt::format};
+use std::{env, fmt::format, ptr::null};
 
 
 use crate::{
-    auth::AuthService, config::Config, db::{database::Database, device_database::DeviceDatabase}, handlers::{device_handler, userhandlers}
+    auth::AuthService, 
+    config::Config, 
+    ssh::connectViaSSH,
+    db::{database::Database, device_database::DeviceDatabase}, 
+    handlers::{device_handler, ssh_handler, userhandlers}
 };
 
 #[actix_web::main]
@@ -61,8 +67,10 @@ async fn main() -> std::io::Result<()> {
         config.jwt.access_token_expiry,
         config.jwt.refresh_token_expiry,
     );
+    let ssh_service = ssh::connectViaSSH::Connect_Via_SSH::new();
 
     let auth_data = web::Data::new(auth_service);
+    let ssh_data = web::Data::new(ssh_service);
 
     let host = config.server.host.clone();
     let port = config.server.port;
@@ -93,6 +101,7 @@ async fn main() -> std::io::Result<()> {
         .app_data(db_data_1.clone())
         .app_data(db_data_2.clone())
         .app_data(auth_data.clone())
+        .app_data(ssh_data.clone())
         .app_data(config_data.clone())
         .service(
                 web::scope("/api/auth")
@@ -111,9 +120,10 @@ async fn main() -> std::io::Result<()> {
         )
         .service(
                 web::scope("/connectDevice")
-                    .route("/send/deviceCMD", web::post().to(handlers::device_handler::register_device))
-                    .route("/abort/deviceAbortion", web::post().to(handlers::device_handler::register_device))
-                    .route("/test", web::get().to(handlers::device_handler::test))
+                    .route("/deviceCMD", web::post().to(handlers::ssh_handler::connect_ssh))
+                    .route("/send/closingSession", web::post().to(handlers::ssh_handler::closingSession))
+                    .route("/send/sendCommand", web::post().to(handlers::ssh_handler::push_cmd))
+                    .route("/test", web::get().to(handlers::ssh_handler::test))
         )
     })
     .bind(format!("{}:{}", host, port))?

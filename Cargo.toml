@@ -1,5 +1,5 @@
 [package]
-name = "new-practice-api"
+name = "spark-micro"
 version = "0.1.0"
 edition = "2024"
 
@@ -9,6 +9,7 @@ edition = "2024"
 actix-web = "4.4"
 actix-cors = "0.6"
 ssh2 = "0.9"
+thiserror = "2"
 
 actix-identity = "0.9"
 actix-session = { version = "0.8", features = ["redis-rs-session"]}
