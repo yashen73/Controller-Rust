@@ -7,7 +7,7 @@ use sqlx::{PgPool, postgres::PgPoolOptions, Error};
 use uuid::Uuid;
 use chrono::Utc;
 use crate::models::{user::User, user::RefreshToken, user::LoginAttempt};
-use crate::config::Config;
+use crate::general_config::Config;
 
 
 #[derive(Clone)]

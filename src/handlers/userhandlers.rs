@@ -13,7 +13,7 @@ use validator::Validate;
 
 use crate:: {
     auth::{AuthService, Claims},
-    config::Config,
+    config::general_config,
     db::database::Database,
     models::{
         user::{AuthResponse, ChangePasswordRequest, ForgotPasswordRequest, LoginRequest, LogoutRequest,
@@ -64,7 +64,7 @@ pub async fn register(
 pub async fn login(
     db: web::Data<Database>, 
     auth_Service: web::Data<AuthService>,
-    config: web::Data<Config>,
+    config: web::Data<general_config::Config>,
     req: web::Json<LoginRequest>,
     http_req: HttpRequest, ) -> impl Responder {
         println!("\n\n[ UserHandler ] :::>>> login in handler.rs is being called by Main.rs");

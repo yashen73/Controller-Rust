@@ -20,4 +20,13 @@ pub enum newSshError {
 
     #[error("Failed to close session: {0}")]
     CloseSession(String),
+
+    #[error("Failed to open shell: {0}")]
+    OpenShell(String),
+
+    #[error("Failed to write Commands: {0}")]
+    Write_All(String),
+
+    #[error("Failed to flush command: {0}")]
+    Flush_command(String),
 }

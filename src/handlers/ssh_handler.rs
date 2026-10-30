@@ -8,7 +8,7 @@ use sqlx::{database, types::ipnetwork::IpNetwork};
 use uuid::{NonNilUuid, Uuid};
 
 use crate::{
-    auth::{self, AuthService, Claims}, config::Config, db::{database::Database, device_database::DeviceDatabase}, models::{
+    auth::{self, AuthService, Claims}, config::general_config, db::{database::Database, device_database::DeviceDatabase}, models::{
         apiResponse::{self, ApiResponse}, 
         device::{ Device, DeviceCard, DeviceEditRequest, DeviceRegisterRequest, DeviceResponse}, 
         sshConnection::{ConnectSSHRequest, ConnetedClosedSDeviceResponse, DeviceCMD, DeviceRPLY, CloseSSHRequest}, user::User
@@ -19,7 +19,7 @@ pub async fn connect_ssh(
     auth_service: web::Data<AuthService>,
     ssh_service: web::Data<Connect_Via_SSH>,
     req_header: HttpRequest,
-    config: web::Data<Config>,
+    config: web::Data<general_config::Config>,
     req: Json<ConnectSSHRequest>,
     db_1: web::Data<Database>,
     db_2: web::Data<DeviceDatabase>) -> impl Responder{
@@ -75,7 +75,7 @@ pub async fn connect_ssh(
 pub async fn push_cmd (
     auth_service: web::Data<AuthService>,
     ssh_service: web::Data<Connect_Via_SSH>,
-    config: web::Data<Config>,
+    config: web::Data<general_config::Config>,
     req_header: HttpRequest,
     req: web::Json<DeviceCMD>,
     db_1: web::Data<Database>,

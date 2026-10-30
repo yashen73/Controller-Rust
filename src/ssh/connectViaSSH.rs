@@ -17,7 +17,7 @@ use std::ptr::null;
 use crate::{
     auth::{AuthService},
     db::{device_database::DeviceDatabase},
-    config::Config,
+    config::general_config,
     models::{
         apiResponse::{ApiResponse},
         sshConnection::{ConnectSSHRequest, ConnetedClosedSDeviceResponse, DeviceCMD, DeviceRPLY, CloseSSHRequest}
@@ -82,23 +82,56 @@ impl Connect_Via_SSH {
 
     //Push_command is pushing Commands to the Device...
     pub async fn push_command(&self, command:DeviceCMD) -> Result<DeviceRPLY, newSshError::newSshError> {
-        println!("\n\n::::::::: >>>>  Connecting_Device in connectViaSSH is called successfully  :::::::::");
+        println!("\n\n::::::::: >>>>  Push_command in connectViaSSH is called successfully  :::::::::");
         
         //Grabbing stored sessions 
         let mut stored_session = self.session.lock().map_err(|e| newSshError::newSshError::UnwrapSession(e.to_string()))?;
+        if stored_session.is_none() {
+            print!("can not find stored_sesion");
+        }
         //Grabbing tje session what we need from stored_session
         let mut new_stored_session = stored_session.as_ref().and_then(|m| m.get(&command.username)).cloned();
+        if stored_session.is_none() {
+            print!("can not find stored_sesion");
+        }
         //Extracting the session for session element
-        let session = match new_stored_session.as_mut(){
+        let session: &mut Session = match new_stored_session.as_mut(){
             Some(session) => session,
             None => {
                 return Err(newSshError::newSshError::NotConnected);
             }
         };
 
+        if stored_session.is_none() {
+            print!("can not find stored_sesion");
+        }
+
         let mut channel = session.channel_session().map_err(|e| newSshError::newSshError::ChannelCreation(e.to_string()))?;
 
-        channel.exec(&command.cmd).map_err(|e| ErrorInternalServerError(newSshError::newSshError::CommandExecution(e.to_string())));
+        //channel.exec(&command.cmd).map_err(|e| ErrorInternalServerError(newSshError::newSshError::CommandExecution(e.to_string())));
+
+        channel.request_pty("xterm-256color", None,  Some((120, 40, 0, 0)));
+
+        if true {
+            print!("Request pty is correct");
+        }
+        if let Err(e) = channel.shell(){
+            return Err(
+                newSshError::newSshError::OpenShell(e.to_string())
+            );
+        };
+
+        // if let Err(e) = channel.write_all(command.cmd.as_bytes()){
+        //     return Err(
+        //         newSshError::newSshError::Write_All(e.to_string())
+        //     );
+        // };
+
+        // if let Err(e) = channel.flush() {
+        //     return Err(
+        //         newSshError::newSshError::Flush_command(e.to_string())
+        //     );
+        // } 
 
         let mut output = String::new();
 

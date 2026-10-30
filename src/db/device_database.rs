@@ -11,7 +11,7 @@ use crate::models::{
     user::{User,RefreshToken, LoginAttempt}, 
     device::{Device, DeviceResponse, DeviceEditRequest, DeviceRegisterRequest}
                 };
-use crate::config::Config;
+use crate::general_config::Config;
 
 
 #[derive(Clone)]

@@ -6,7 +6,7 @@ use lettre::transport::smtp::commands::{Auth, Data};
 use sqlx::{database, types::ipnetwork::IpNetwork};
 
 use crate::{
-    auth::{self, AuthService, Claims}, config::Config, db::{database::Database, device_database::DeviceDatabase}, models::{
+    auth::{self, AuthService, Claims}, config::general_config, db::{database::Database, device_database::DeviceDatabase}, models::{
         apiResponse::{self, ApiResponse}, device::{ConnectDeviceSSH, Device, DeviceCard, DeviceEditRequest, DeviceRegisterRequest, DeviceResponse}, user::User
     }
 };
